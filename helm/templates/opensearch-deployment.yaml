@@ -17,6 +17,9 @@ spec:
         network/opensearch-net: "true"
         service: opensearch
     spec:
+      securityContext:
+        runAsUser: 1000
+        fsGroup: 1000
       containers:
         - env:
             - name: OPENSEARCH_JAVA_OPTS
@@ -35,8 +38,18 @@ spec:
           volumeMounts:
             - mountPath: /usr/share/opensearch/data
               name: opensearch-data
-      restartPolicy: Always
+      initContainers:
+      - name: chown-init-container 
+        image: busybox
+        command: ["/bin/chown","-R","1000:1000", "/usr/share/opensearch/data"]
+        securityContext:
+          runAsUser: 0
+          privileged: true
+        volumeMounts:
+        - name: opensearch-data 
+          mountPath: /usr/share/opensearch/data
       volumes:
         - name: opensearch-data
           persistentVolumeClaim:
             claimName: opensearch-data
+      restartPolicy: Always

@@ -35,6 +35,8 @@ spec:
                 secretKeyRef:
                   key: POSTGRES_DB
                   name: db
+            - name: PGDATA
+              value: /var/lib/postgresql/data/dotcms
           ports:
             - containerPort: 5432
               name: db 

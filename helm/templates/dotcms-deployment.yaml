@@ -18,6 +18,10 @@ spec:
         network/opensearch-net: "true"
         service: dotcms
     spec:
+#      terminationGracePeriodSeconds: 30
+      securityContext:
+        runAsUser: 65001 
+        fsGroup: 65001 
       containers:
         - env:
             - name: CMS_JAVA_OPTS
@@ -48,10 +52,20 @@ spec:
           volumeMounts:
             - mountPath: /data/shared
               name: cms-shared
-      hostNetwork: true
-      dnsPolicy: ClusterFirstWithHostNet
-      restartPolicy: Always
+      initContainers:
+      - name: change-ownership-container
+        image: busybox
+        command: ["/bin/chown","-R","65001:65001", "/data/shared"]
+        securityContext:
+          runAsUser: 0 
+          privileged: true
+        volumeMounts:
+        - name: cms-shared
+          mountPath: /data/shared
       volumes:
         - name: cms-shared
           persistentVolumeClaim:
             claimName: cms-shared
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      restartPolicy: Always
