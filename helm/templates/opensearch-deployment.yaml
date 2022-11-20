@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    service: opensearch
+  name: opensearch
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      service: opensearch
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        network/opensearch-net: "true"
+        service: opensearch
+    spec:
+      containers:
+        - env:
+            - name: OPENSEARCH_JAVA_OPTS
+              value: '-Xmx1G '
+            - name: bootstrap.memory_lock
+              value: "true"
+            - name: cluster.name
+              value: elastic-cluster
+            - name: discovery.type
+              value: single-node
+          image: opensearchproject/opensearch:1.3.6
+          name: opensearch
+          ports:
+            - containerPort: 9200
+            - containerPort: 9600
+          volumeMounts:
+            - mountPath: /usr/share/opensearch/data
+              name: opensearch-data
+      restartPolicy: Always
+      volumes:
+        - name: opensearch-data
+          persistentVolumeClaim:
+            claimName: opensearch-data

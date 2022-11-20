@@ -1,0 +1,13 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: dotcms-db-net
+spec:
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              network/dotcms-db-net: "true"
+  podSelector:
+    matchLabels:
+      network/dotcms-db-net: "true"

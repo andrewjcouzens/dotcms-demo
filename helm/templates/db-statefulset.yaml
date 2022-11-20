@@ -1,0 +1,55 @@
+apiVersion: apps/v1 
+kind: StatefulSet
+metadata:
+  name: db
+  labels:
+    service: db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      service: db
+  serviceName: db
+  template:
+    metadata:
+      labels:
+        network/dotcms-db-net: "true"
+        service: db
+    spec:
+      containers:
+        - name: db 
+          image: postgres:15
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  key: POSTGRES_USER
+                  name: db 
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: POSTGRES_PASSWORD
+                  name: db 
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  key: POSTGRES_DB
+                  name: db
+          ports:
+            - containerPort: 5432
+              name: db 
+              protocol: TCP
+          volumeMounts:
+            - name: dbdata 
+              mountPath: /var/lib/postgresql/data
+          args:
+            - postgres
+            - -c
+            - max_connections=400
+            - -c
+            - shared_buffers=128MB
+      restartPolicy: Always
+      volumes:
+        - name: dbdata 
+          persistentVolumeClaim:
+            claimName: dbdata 

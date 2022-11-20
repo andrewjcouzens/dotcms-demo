@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    service: dotcms
+  name: dotcms
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      service: dotcms
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        network/dotcms-db-net: "true"
+        network/opensearch-net: "true"
+        service: dotcms
+    spec:
+      containers:
+        - env:
+            - name: CMS_JAVA_OPTS
+              value: '-Xmx1g '
+            - name: CUSTOM_STARTER_URL
+              value: https://repo.dotcms.com/artifactory/libs-release-local/com/dotcms/starter/20220713/starter-20220713.zip
+            - name: DB_BASE_URL
+              value: jdbc:postgresql://db/dotcms
+            - name: DB_PASSWORD
+              value: password
+            - name: DB_USERNAME
+              value: dotcmsdbuser
+            - name: DOT_ES_AUTH_BASIC_PASSWORD
+              value: admin
+            - name: DOT_ES_ENDPOINTS
+              value: https://opensearch:9200
+            - name: DOT_INITIAL_ADMIN_PASSWORD
+              value: admin
+            - name: LANG
+              value: C.UTF-8
+            - name: TZ
+              value: UTC
+          image: dotcms/dotcms:22.09
+          name: dotcms
+          ports:
+            - containerPort: 8082
+            - containerPort: 8443
+          volumeMounts:
+            - mountPath: /data/shared
+              name: cms-shared
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      restartPolicy: Always
+      volumes:
+        - name: cms-shared
+          persistentVolumeClaim:
+            claimName: cms-shared
