@@ -80,7 +80,7 @@ To learn more, consult https://cloud.google.com/blog/products/containers-kuberne
 touch: cannot touch '/data/shared/custom_starter.zip': Permission denied
 ```
 
-- SOLUTION: Examined the dotcms pod and found the uid/gid of the dotcms user to be 65001.  Modified the dotcms deployment to use a securityContext definition to set the uid/gid to 65001 and then leveraged an initContainers directive to then chown the cms shared volume to be uid/gid 65001 
+- SOLUTION: Examined the dotcms pod and found dotCMS crashing due to permission issues.  Checked /etc/group and found the uid/gid of the dotcms user to be 65001.  Modified the dotcms deployment to use a securityContext definition to set the uid/gid to 65001 and then leveraged an initContainers directive to then chown the cms shared volume to be uid/gid 65001 
 - PROBLEM: dotcms can't contact elastic search
 
 ```
