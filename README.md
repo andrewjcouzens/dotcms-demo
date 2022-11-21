@@ -42,7 +42,7 @@ dotCMS k8s demo
 }
 ```
 
-- SSL: likely we require some ingress configured to redirect the traffic hitting the API server to go to the app instead.
+- SSL: likely we require some ingress configured to redirect the traffic hitting the API server to go to the app instead. (https://kubernetes.github.io/ingress-nginx/examples/rewrite/ or perhaps https://kubernetes.github.io/ingress-nginx/examples/tls-termination/)
 - OBSERVATION: dotcms pod should wait for db pod to spin up before trying to connect
 
 #### Install into GCP
