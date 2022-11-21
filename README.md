@@ -42,7 +42,7 @@ dotCMS k8s demo
 }
 ```
 
-- SSL: likely we require some ingress rule to redirect the traffic hitting the API server to go to the app instead.
+- SSL: likely we require some ingress configured to redirect the traffic hitting the API server to go to the app instead.
 - OBSERVATION: dotcms pod should wait for db pod to spin up before trying to connect
 
 #### Install into GCP
@@ -88,7 +88,16 @@ touch: cannot touch '/data/shared/custom_starter.zip': Permission denied
 23:06:20.304  ERROR business.ESIndexAPI - Elasticsearch Attempt #1 : Connection refused
 ```
 
-- SOLUTION: Examined the opensearch pod and found the uid/gid of the opensearch user to be 1000.  Modified the opensearch deployment to use a securityContext definition identical to dotcms.
+- SOLUTION: OpenSearch was crashing due to permission issues.  Examined the opensearch pod and found the uid/gid of the opensearch user to be 1000.  Modified the opensearch deployment to use a securityContext definition identical to dotcms.
+
+- Setup a port-forward using kubectl and was then able to use HTTPS to access dotCMS in GKE.  A production solution would be to setup GKE Ingress either terminating the SSL at the load balancer and forwarding on the traffic encrypted or passing the SSL connection through.
+
+```
+21-Nov-2022 00:04:38.770 INFO [url:POST//default/api/v1/authentication | lang:1 | ip:127.0.0.1 | Admin:false | start:11-20-2022 11:42:51 UTC  ref:https://localhost:8443/dotAdmin/] com.dotcms.repackage.org.hibernate.validator.internal.util.Version.<clinit> HV000001: Hibernate Validator 4.3.2.Final
+00:04:39.182  INFO  util.SecurityLogger - class com.dotmarketing.cms.login.factories.LoginFactory : User password was rehash with id: dotcms.org.1 -- ip:127.0.0.1,user:null
+00:04:39.475  WARN  auth.PrincipalThreadLocal - getName null
+00:04:39.528  INFO  util.SecurityLogger - class com.dotcms.cms.login.LoginServiceAPIFactory$LoginServiceImpl : User dotcms.org.1 has successfully login from IP: 127.0.0.1 -- ip:127.0.0.1,user:Admin User [ID: dotcms.org.1][email:admin@dotcms.com]
+```
 
 
 # INSTALL:
