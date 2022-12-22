@@ -44,7 +44,8 @@ spec:
               value: C.UTF-8
             - name: TZ
               value: UTC
-          image: dotcms/dotcms:22.09
+                #image: dotcms/dotcms:22.09
+          image: dotcms/dotcms:5.2.8.5-6d268ba
           name: dotcms
           ports:
             - containerPort: 8082
@@ -52,20 +53,28 @@ spec:
           volumeMounts:
             - mountPath: /data/shared
               name: cms-shared
+            - mountPath: /esdata
+              name: opensearch-data
       initContainers:
       - name: change-ownership-container
         image: busybox
-        command: ["/bin/chown","-R","65001:65001", "/data/shared"]
+        command: ["/bin/sh", "-c"]
+        args: ["/bin/chown -R 65001:65001 /esdata && chown -R 65001:65001 /data/shared"]
         securityContext:
           runAsUser: 0 
           privileged: true
         volumeMounts:
         - name: cms-shared
           mountPath: /data/shared
+        - name: opensearch-data 
+          mountPath: /esdata
       volumes:
         - name: cms-shared
           persistentVolumeClaim:
             claimName: cms-shared
+        - name: opensearch-data
+          persistentVolumeClaim:
+            claimName: opensearch-data
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
       restartPolicy: Always
